@@ -1,11 +1,9 @@
-/**
- *Submitted for verification at Etherscan.io on 2017-07-19
-*/
+// SPDX-License-Identifier: UNLICENSED
 
 pragma solidity 0.8.7;
-contract CryptoPunksMarket {
+contract CryptolatinsMarket {
 
-    // You can use this hash to verify the image file containing all the punks
+    // Se puede ocupar este hash para comprobar las imágenes
     string public imageHash = "ac39af4793119ee46bbff351d8cb6b5f23da60222126add4268e261199a2921b";
 
     address owner;
@@ -16,20 +14,20 @@ contract CryptoPunksMarket {
     uint8 public decimals;
     uint256 public totalSupply;
 
-    uint public nextPunkIndexToAssign = 0;
+    uint public nextLatinIndexToAssign = 0;
 
-    bool public allPunksAssigned = false;
-    uint public punksRemainingToAssign = 0;
+    bool public allLatinsAssigned = false;
+    uint public latinsRemainingToAssign = 0;
 
     //mapping (address => uint) public addressToLatinIndex;
-    mapping (uint => address) public punkIndexToAddress;
+    mapping (uint => address) public latinIndexToAddress;
 
     /* This creates an array with all balances */
     mapping (address => uint256) public balanceOf;
 
     struct Offer {
         bool isForSale;
-        uint punkIndex;
+        uint latinIndex;
         address seller;
         uint minValue;          // in Matic´s
         address onlySellTo;     // specify to sell only to a specific person
@@ -64,7 +62,7 @@ contract CryptoPunksMarket {
         //        balanceOf[msg.sender] = initialSupply;              // Give the creator all initial tokens
         owner = msg.sender;
         totalSupply = 1000;                        // Update total supply
-        punksRemainingToAssign = totalSupply;
+        latinsRemainingToAssign = totalSupply;
         name = "LATINTHINGS";                                   // Set the name for display purposes
         symbol = "O_o";                               // Set the symbol for display purposes
         decimals = 0;                                       // Amount of decimals for display purposes
@@ -76,15 +74,15 @@ contract CryptoPunksMarket {
         if (latinIndex >= 10000);
         // Avance Miércoles 1/09/2021 a las 10:31     
         
-        if (punkIndexToAddress[punkIndex] != to) {
-            if (punkIndexToAddress[punkIndex] != 0x0) {
-                balanceOf[punkIndexToAddress[punkIndex]]--;
+        if (latinIndexToAddress[latinIndex] != to) {
+            if (latinIndexToAddress[latinIndex] != 0x0) {
+                balanceOf[latinIndexToAddress[latinIndex]]--;
             } else {
-                punksRemainingToAssign--;
+                latinsRemainingToAssign--;
             }
-            punkIndexToAddress[punkIndex] = to;
+            latinIndexToAddress[latinIndex] = to;
             balanceOf[to]++;
-            Assign(to, punkIndex);
+            Assign(to, latinIndex);
         }
     }
 
@@ -98,99 +96,99 @@ contract CryptoPunksMarket {
 
     function allInitialOwnersAssigned() {
         if (msg.sender != owner) throw;
-        allPunksAssigned = true;
+        alllatinsAssigned = true;
     }
 
-    function getPunk(uint punkIndex) {
-        if (!allPunksAssigned) throw;
-        if (punksRemainingToAssign == 0) throw;
-        if (punkIndexToAddress[punkIndex] != 0x0) throw;
-        if (punkIndex >= 10000) throw;
-        punkIndexToAddress[punkIndex] = msg.sender;
+    function getlatin(uint latinIndex) {
+        if (!alllatinsAssigned) throw;
+        if (latinsRemainingToAssign == 0) throw;
+        if (latinIndexToAddress[latinIndex] != 0x0) throw;
+        if (latinIndex >= 10000) throw;
+        latinIndexToAddress[latinIndex] = msg.sender;
         balanceOf[msg.sender]++;
-        punksRemainingToAssign--;
-        Assign(msg.sender, punkIndex);
+        latinsRemainingToAssign--;
+        Assign(msg.sender, latinIndex);
     }
 
-    // Transfer ownership of a punk to another user without requiring payment
-    function transferPunk(address to, uint punkIndex) {
-        if (!allPunksAssigned) throw;
-        if (punkIndexToAddress[punkIndex] != msg.sender) throw;
-        if (punkIndex >= 10000) throw;
-        if (punksOfferedForSale[punkIndex].isForSale) {
-            punkNoLongerForSale(punkIndex);
+    // Transfer ownership of a latin to another user without requiring payment
+    function transferlatin(address to, uint latinIndex) {
+        if (!alllatinsAssigned) throw;
+        if (latinIndexToAddress[latinIndex] != msg.sender) throw;
+        if (latinIndex >= 10000) throw;
+        if (latinsOfferedForSale[latinIndex].isForSale) {
+            latinNoLongerForSale(latinIndex);
         }
-        punkIndexToAddress[punkIndex] = to;
+        latinIndexToAddress[latinIndex] = to;
         balanceOf[msg.sender]--;
         balanceOf[to]++;
         Transfer(msg.sender, to, 1);
-        PunkTransfer(msg.sender, to, punkIndex);
+        latinTransfer(msg.sender, to, latinIndex);
         // Check for the case where there is a bid from the new owner and refund it.
         // Any other bid can stay in place.
-        Bid bid = punkBids[punkIndex];
+        Bid bid = latinBids[latinIndex];
         if (bid.bidder == to) {
             // Kill bid and refund value
             pendingWithdrawals[to] += bid.value;
-            punkBids[punkIndex] = Bid(false, punkIndex, 0x0, 0);
+            latinBids[latinIndex] = Bid(false, latinIndex, 0x0, 0);
         }
     }
 
-    function punkNoLongerForSale(uint punkIndex) {
-        if (!allPunksAssigned) throw;
-        if (punkIndexToAddress[punkIndex] != msg.sender) throw;
-        if (punkIndex >= 10000) throw;
-        punksOfferedForSale[punkIndex] = Offer(false, punkIndex, msg.sender, 0, 0x0);
-        PunkNoLongerForSale(punkIndex);
+    function latinNoLongerForSale(uint latinIndex) {
+        if (!alllatinsAssigned) throw;
+        if (latinIndexToAddress[latinIndex] != msg.sender) throw;
+        if (latinIndex >= 10000) throw;
+        latinsOfferedForSale[latinIndex] = Offer(false, latinIndex, msg.sender, 0, 0x0);
+        latinNoLongerForSale(latinIndex);
     }
 
-    function offerPunkForSale(uint punkIndex, uint minSalePriceInWei) {
-        if (!allPunksAssigned) throw;
-        if (punkIndexToAddress[punkIndex] != msg.sender) throw;
-        if (punkIndex >= 10000) throw;
-        punksOfferedForSale[punkIndex] = Offer(true, punkIndex, msg.sender, minSalePriceInWei, 0x0);
-        PunkOffered(punkIndex, minSalePriceInWei, 0x0);
+    function offerlatinForSale(uint latinIndex, uint minSalePriceInWei) {
+        if (!alllatinsAssigned) throw;
+        if (latinIndexToAddress[latinIndex] != msg.sender) throw;
+        if (latinIndex >= 10000) throw;
+        latinsOfferedForSale[latinIndex] = Offer(true, latinIndex, msg.sender, minSalePriceInWei, 0x0);
+        latinOffered(latinIndex, minSalePriceInWei, 0x0);
     }
 
-    function offerPunkForSaleToAddress(uint punkIndex, uint minSalePriceInWei, address toAddress) {
-        if (!allPunksAssigned) throw;
-        if (punkIndexToAddress[punkIndex] != msg.sender) throw;
-        if (punkIndex >= 10000) throw;
-        punksOfferedForSale[punkIndex] = Offer(true, punkIndex, msg.sender, minSalePriceInWei, toAddress);
-        PunkOffered(punkIndex, minSalePriceInWei, toAddress);
+    function offerlatinForSaleToAddress(uint latinIndex, uint minSalePriceInWei, address toAddress) {
+        if (!alllatinsAssigned) throw;
+        if (latinIndexToAddress[latinIndex] != msg.sender) throw;
+        if (latinIndex >= 10000) throw;
+        latinsOfferedForSale[latinIndex] = Offer(true, latinIndex, msg.sender, minSalePriceInWei, toAddress);
+        latinOffered(latinIndex, minSalePriceInWei, toAddress);
     }
 
-    function buyPunk(uint punkIndex) payable {
-        if (!allPunksAssigned) throw;
-        Offer offer = punksOfferedForSale[punkIndex];
-        if (punkIndex >= 10000) throw;
-        if (!offer.isForSale) throw;                // punk not actually for sale
-        if (offer.onlySellTo != 0x0 && offer.onlySellTo != msg.sender) throw;  // punk not supposed to be sold to this user
+    function buylatin(uint latinIndex) payable {
+        if (!alllatinsAssigned) throw;
+        Offer offer = latinsOfferedForSale[latinIndex];
+        if (latinIndex >= 10000) throw;
+        if (!offer.isForSale) throw;                // latin not actually for sale
+        if (offer.onlySellTo != 0x0 && offer.onlySellTo != msg.sender) throw;  // latin not supposed to be sold to this user
         if (msg.value < offer.minValue) throw;      // Didn't send enough ETH
-        if (offer.seller != punkIndexToAddress[punkIndex]) throw; // Seller no longer owner of punk
+        if (offer.seller != latinIndexToAddress[latinIndex]) throw; // Seller no longer owner of latin
 
         address seller = offer.seller;
 
-        punkIndexToAddress[punkIndex] = msg.sender;
+        latinIndexToAddress[latinIndex] = msg.sender;
         balanceOf[seller]--;
         balanceOf[msg.sender]++;
         Transfer(seller, msg.sender, 1);
 
-        punkNoLongerForSale(punkIndex);
+        latinNoLongerForSale(latinIndex);
         pendingWithdrawals[seller] += msg.value;
-        PunkBought(punkIndex, msg.value, seller, msg.sender);
+        latinBought(latinIndex, msg.value, seller, msg.sender);
 
         // Check for the case where there is a bid from the new owner and refund it.
         // Any other bid can stay in place.
-        Bid bid = punkBids[punkIndex];
+        Bid bid = latinBids[latinIndex];
         if (bid.bidder == msg.sender) {
             // Kill bid and refund value
             pendingWithdrawals[msg.sender] += bid.value;
-            punkBids[punkIndex] = Bid(false, punkIndex, 0x0, 0);
+            latinBids[latinIndex] = Bid(false, latinIndex, 0x0, 0);
         }
     }
 
     function withdraw() {
-        if (!allPunksAssigned) throw;
+        if (!alllatinsAssigned) throw;
         uint amount = pendingWithdrawals[msg.sender];
         // Remember to zero the pending refund before
         // sending to prevent re-entrancy attacks
@@ -198,53 +196,53 @@ contract CryptoPunksMarket {
         msg.sender.transfer(amount);
     }
 
-    function enterBidForPunk(uint punkIndex) payable {
-        if (punkIndex >= 10000) throw;
-        if (!allPunksAssigned) throw;                
-        if (punkIndexToAddress[punkIndex] == 0x0) throw;
-        if (punkIndexToAddress[punkIndex] == msg.sender) throw;
+    function enterBidForlatin(uint latinIndex) payable {
+        if (latinIndex >= 10000) throw;
+        if (!alllatinsAssigned) throw;                
+        if (latinIndexToAddress[latinIndex] == 0x0) throw;
+        if (latinIndexToAddress[latinIndex] == msg.sender) throw;
         if (msg.value == 0) throw;
-        Bid existing = punkBids[punkIndex];
+        Bid existing = latinBids[latinIndex];
         if (msg.value <= existing.value) throw;
         if (existing.value > 0) {
             // Refund the failing bid
             pendingWithdrawals[existing.bidder] += existing.value;
         }
-        punkBids[punkIndex] = Bid(true, punkIndex, msg.sender, msg.value);
-        PunkBidEntered(punkIndex, msg.value, msg.sender);
+        latinBids[latinIndex] = Bid(true, latinIndex, msg.sender, msg.value);
+        latinBidEntered(latinIndex, msg.value, msg.sender);
     }
 
-    function acceptBidForPunk(uint punkIndex, uint minPrice) {
-        if (punkIndex >= 10000) throw;
-        if (!allPunksAssigned) throw;                
-        if (punkIndexToAddress[punkIndex] != msg.sender) throw;
+    function acceptBidForlatin(uint latinIndex, uint minPrice) {
+        if (latinIndex >= 10000) throw;
+        if (!alllatinsAssigned) throw;                
+        if (latinIndexToAddress[latinIndex] != msg.sender) throw;
         address seller = msg.sender;
-        Bid bid = punkBids[punkIndex];
+        Bid bid = latinBids[latinIndex];
         if (bid.value == 0) throw;
         if (bid.value < minPrice) throw;
 
-        punkIndexToAddress[punkIndex] = bid.bidder;
+        latinIndexToAddress[latinIndex] = bid.bidder;
         balanceOf[seller]--;
         balanceOf[bid.bidder]++;
         Transfer(seller, bid.bidder, 1);
 
-        punksOfferedForSale[punkIndex] = Offer(false, punkIndex, bid.bidder, 0, 0x0);
+        latinsOfferedForSale[latinIndex] = Offer(false, latinIndex, bid.bidder, 0, 0x0);
         uint amount = bid.value;
-        punkBids[punkIndex] = Bid(false, punkIndex, 0x0, 0);
+        latinBids[latinIndex] = Bid(false, latinIndex, 0x0, 0);
         pendingWithdrawals[seller] += amount;
-        PunkBought(punkIndex, bid.value, seller, bid.bidder);
+        latinBought(latinIndex, bid.value, seller, bid.bidder);
     }
 
-    function withdrawBidForPunk(uint punkIndex) {
-        if (punkIndex >= 10000) throw;
-        if (!allPunksAssigned) throw;                
-        if (punkIndexToAddress[punkIndex] == 0x0) throw;
-        if (punkIndexToAddress[punkIndex] == msg.sender) throw;
-        Bid bid = punkBids[punkIndex];
+    function withdrawBidForlatin(uint latinIndex) {
+        if (latinIndex >= 10000) throw;
+        if (!alllatinsAssigned) throw;                
+        if (latinIndexToAddress[latinIndex] == 0x0) throw;
+        if (latinIndexToAddress[latinIndex] == msg.sender) throw;
+        Bid bid = latinBids[latinIndex];
         if (bid.bidder != msg.sender) throw;
-        PunkBidWithdrawn(punkIndex, bid.value, msg.sender);
+        latinBidWithdrawn(latinIndex, bid.value, msg.sender);
         uint amount = bid.value;
-        punkBids[punkIndex] = Bid(false, punkIndex, 0x0, 0);
+        latinBids[latinIndex] = Bid(false, latinIndex, 0x0, 0);
         // Refund the bid money
         msg.sender.transfer(amount);
     }
